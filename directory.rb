@@ -14,7 +14,7 @@ def input_students
   hobby = gets.strip
 
   puts "Place of birth"
-  p_o_b = gets.strip
+  birthplace = gets.strip
 
   puts "Height"
   height = gets.strip.to_s
@@ -24,7 +24,7 @@ def input_students
   end
 
   while !name.empty? do
-    @students << {name: name, cohort: cohort, hobby: hobby, birthplace: p_o_b, height: height}
+    @students << {name: name, cohort: cohort, hobby: hobby, birthplace: birthplace, height: height}
     if @students.count == 1
       puts "Now we have #{@students.count} student"
     else
@@ -41,7 +41,7 @@ def input_students
     hobby = gets.strip
 
     puts "Place of birth"
-    p_o_b = gets.strip
+    birthplace = gets.strip
 
     puts "Height"
     height = gets.strip.to_s
@@ -91,6 +91,7 @@ def print_menu
   puts "1. Input the students"
   puts "2. Show the students"
   puts "3. Save the list to students.csv"
+  puts "4. Load the list from students.csv"
   puts "9. Exit" # 9 because we'll be adding more items
 end
 
@@ -108,6 +109,8 @@ def process(selection)
     show_students
   when "3"
     save_students
+  when "4"
+    load_students
   when "9"
     exit
   else
@@ -121,6 +124,15 @@ def save_students
     student_data = [student[:name], student[:cohort], student[:hobby], student[:birthplace], student[:height]]
     csv_line = student_data.join(",")
     file.puts csv_line
+  end
+  file.close
+end
+
+def load_students
+  file = File.open("students.csv", "r")
+  file.readlines.each do |line|
+  name, cohort, hobby, birthplace, height = line.chomp.split(',')
+    @students << {name: name, cohort: cohort, hobby: hobby, birthplace: birthplace, height: height}
   end
   file.close
 end
