@@ -1,10 +1,9 @@
 def input_students
   puts "Please enter student profiles"
   puts "To finish enter empty values in all"
-  puts "Enter a default cohort"
-  default_cohort = gets.strip
-  students = []
-  $months = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
+  default_cohort = "november"
+  @students = []
+  @months = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
   puts "Enter a name"
   name = gets.strip
 
@@ -20,16 +19,16 @@ def input_students
   puts "Height"
   height = gets.strip.to_s
 
-  if cohort.empty? || !$months.include?(cohort)
+  if cohort.empty? || !@months.include?(cohort)
     cohort = default_cohort
   end
 
   while !name.empty? do
-    students << {name: name, cohort: cohort, hobby: hobby, birthplace: p_o_b, height: height}
-    if students.count == 1
-      puts "Now we have #{students.count} student"
+    @students << {name: name, cohort: cohort, hobby: hobby, birthplace: p_o_b, height: height}
+    if @students.count == 1
+      puts "Now we have #{@students.count} student"
     else
-      puts "Now we have #{students.count} students"
+      puts "Now we have #{@students.count} students"
     end
 
     puts "Enter a name"
@@ -47,11 +46,10 @@ def input_students
     puts "Height"
     height = gets.strip.to_s
 
-    if cohort.empty? || !$months.include?(cohort)
+    if cohort.empty? || !@months.include?(cohort)
       cohort = default_cohort
     end
   end
-  students
 end
 
 def print_header
@@ -59,30 +57,58 @@ def print_header
   puts "-------------".center(180)
 end
 
-def print(array, array2)
-  if array.empty?
+def print_students_list
+  if @students.empty?
     puts "No students to display".center(180)
   else
     count = 0
-    while count < array.count
-      if array[count - 1][:name].start_with?("a") && array[count - 1][:name].length <= 12 && array[count][:cohort] == "january"
-      array2.each { |month|
-        puts "#{count + 1}. #{array[count][:name].capitalize}, Hobby: #{array[count][:hobby].capitalize}, Height: #{array[count][:height]}, Place of Birth: #{array[count][:birthplace]} (#{array[count][:cohort]} cohort)".center(180) if array[count][:cohort] == month  }
+    while count < @students.count
+      if @students[count - 1][:name].start_with?("a") && @students[count - 1][:name].length <= 12 && @students[count][:cohort] == "november"
+      @months.each { |month|
+        puts "#{count + 1}. #{@students[count][:name].capitalize}, Hobby: #{@students[count][:hobby].capitalize}, Height: #{@students[count][:height]}, Place of Birth: #{@students[count][:birthplace]} (#{@students[count][:cohort]} cohort)".center(180) if @students[count][:cohort] == month  }
       end
       count +=1
     end
   end
 end
 
-def print_footer(names)
-  if names.count == 1
-    puts "Overall, we have #{names.count} great student".center(180)
+def print_footer
+  if @students.count == 1
+    puts "Overall, we have #{@students.count} great student".center(180)
   else
-    puts "Overall, we have #{names.count} great students".center(180)
+    puts "Overall, we have #{@students.count} great students".center(180)
   end
 end
 
-students = input_students
-print_header
-print(students, $months)
-print_footer(students)
+def interactive_menu
+  loop do
+    print_menu
+    process(gets.chomp)
+  end
+end
+
+def print_menu
+  puts "1. Input the students"
+  puts "2. Show the students"
+  puts "9. Exit" # 9 because we'll be adding more items
+end
+
+def show_students
+  print_header
+  print_students_list
+  print_footer
+end
+
+def process(selection)
+  case selection
+  when "1"
+    students = input_students
+  when "2"
+    show_students
+  when "9"
+    exit
+  else
+    puts "I don't know what you meant, try again"
+  end
+end
+interactive_menu
