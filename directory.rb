@@ -24,7 +24,7 @@ def input_students
   end
 
   while !name.empty? do
-    @students << {name: name, cohort: cohort, hobby: hobby, birthplace: birthplace, height: height}
+    add_student(name, cohort, hobby, birthplace, height)
     if @students.count == 1
       puts "Now we have #{@students.count} student"
     else
@@ -52,6 +52,10 @@ def input_students
   end
 end
 
+def add_student(name, cohort, hobby, birthplace, height)
+  @students << {name: name, cohort: cohort, hobby: hobby, birthplace: birthplace, height: height}
+end
+
 def print_header
   puts "The students of Villains Academy".center(180)
   puts "-------------".center(180)
@@ -61,12 +65,10 @@ def print_students_list
   if @students.empty?
     puts "No students to display".center(180)
   else
-    count = 0
-    while count < @students.count
-      if @students[count - 1][:name].start_with?("a") && @students[count - 1][:name].length <= 12 && @students[count][:cohort] == "november"
+    count = 1
+    @students.each do |student|
       @months.each { |month|
-        puts "#{count + 1}. #{@students[count][:name].capitalize}, Hobby: #{@students[count][:hobby].capitalize}, Height: #{@students[count][:height]}, Place of Birth: #{@students[count][:birthplace]} (#{@students[count][:cohort]} cohort)".center(180) if @students[count][:cohort] == month  }
-      end
+        puts "#{count}. #{student[:name]}, Hobby: #{student[:hobby]}, Height: #{student[:height]}, Place of Birth: #{student[:birthplace]} (#{student[:cohort]} cohort)".center(180) if student[:cohort] == month  }
       count +=1
     end
   end
@@ -89,9 +91,10 @@ end
 
 def print_menu
   puts "1. Input the students"
-  puts "2. Show the students"
+  puts "2. Show all students"
   puts "3. Save the list to students.csv"
   puts "4. Load the list from students.csv"
+  puts "5. Show select students"
   puts "9. Exit" # 9 because we'll be adding more items
 end
 
@@ -99,6 +102,20 @@ def show_students
   print_header
   print_students_list
   print_footer
+end
+
+def show_select_students
+  puts "Choose which cohort to show"
+  month = STDIN.gets.strip
+  puts "Starting with what letter?"
+  letter = STDIN.gets.strip
+  count = 1
+  @students.each do |student|
+    if student[:cohort] == month && student[:name].start_with?(letter) && student[:name].length <= 12
+      puts "#{count}. #{student[:name]}, Hobby: #{student[:hobby]}, Height: #{student[:height]}, Place of Birth: #{student[:birthplace]} (#{student[:cohort]} cohort)".center(180)
+      count += 1
+    end
+  end
 end
 
 def process(selection)
@@ -111,6 +128,8 @@ def process(selection)
     save_students
   when "4"
     load_students
+  when "5"
+    show_select_students
   when "9"
     exit
   else
@@ -126,6 +145,7 @@ def save_students
     file.puts csv_line
   end
   file.close
+  puts "Student(s) saved"
 end
 
 def load_students(filename = "students.csv")
@@ -135,18 +155,14 @@ def load_students(filename = "students.csv")
     @students << {name: name, cohort: cohort, hobby: hobby, birthplace: birthplace, height: height}
   end
   file.close
+  puts "-------------------".center(180)
+  puts "Loaded #{filename}".center(180)
+  puts "-------------------".center(180)
 end
 
 def try_load_students
-  filename = ARGV.first # first argument from the command line
-  return if filename.nil? # get out of the method if it isn't given
-  if File.exists?(filename) # if it exists
-    load_students(filename)
-     puts "Loaded #{@students.count} from #{filename}"
-  else # if it doesn't exist
-    puts "Sorry, #{filename} doesn't exist."
-    exit # quit the program
-  end
+  ARGV.first != nil ? filename = ARGV.first : filename = "students.csv"
+  load_students(filename)
 end
 try_load_students
 interactive_menu
