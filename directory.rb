@@ -1,5 +1,6 @@
 @students = []
 @months = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
+@delineate = Proc.new { puts "---------------".center(180) }
 def input_students
   puts "Please enter student profiles"
   puts "To finish enter empty values in all"
@@ -58,7 +59,7 @@ end
 
 def print_header
   puts "The students of Villains Academy".center(180)
-  puts "-------------".center(180)
+  @delineate.call
 end
 
 def print_students_list
@@ -67,9 +68,22 @@ def print_students_list
   else
     count = 1
     @students.each do |student|
-      @months.each { |month|
-        puts "#{count}. #{student[:name]}, Hobby: #{student[:hobby]}, Height: #{student[:height]}, Place of Birth: #{student[:birthplace]} (#{student[:cohort]} cohort)".center(180) if student[:cohort] == month  }
+        puts "#{count}. #{student[:name].capitalize}, Hobby: #{student[:hobby]}, Height: #{student[:height]}, Place of Birth: #{student[:birthplace]} (#{student[:cohort]} cohort)".center(180)
       count +=1
+    end
+  end
+end
+
+def show_select_students
+  puts "Choose which cohort to show"
+  month = STDIN.gets.strip
+  puts "Starting with what letter?"
+  letter = STDIN.gets.strip
+  count = 1
+  @students.each do |student|
+    if student[:cohort] == month && student[:name].start_with?(letter) && student[:name].length <= 12
+      puts "#{count}. #{student[:name].capitalize}, Hobby: #{student[:hobby]}, Height: #{student[:height]}, Place of Birth: #{student[:birthplace]} (#{student[:cohort]} cohort)".center(180)
+      count += 1
     end
   end
 end
@@ -92,8 +106,8 @@ end
 def print_menu
   puts "1. Input the students"
   puts "2. Show all students"
-  puts "3. Save the list to students.csv"
-  puts "4. Load the list from students.csv"
+  puts "3. Save the list to specified file"
+  puts "4. Load the list from specified file"
   puts "5. Show select students"
   puts "9. Exit" # 9 because we'll be adding more items
 end
@@ -104,19 +118,7 @@ def show_students
   print_footer
 end
 
-def show_select_students
-  puts "Choose which cohort to show"
-  month = STDIN.gets.strip
-  puts "Starting with what letter?"
-  letter = STDIN.gets.strip
-  count = 1
-  @students.each do |student|
-    if student[:cohort] == month && student[:name].start_with?(letter) && student[:name].length <= 12
-      puts "#{count}. #{student[:name]}, Hobby: #{student[:hobby]}, Height: #{student[:height]}, Place of Birth: #{student[:birthplace]} (#{student[:cohort]} cohort)".center(180)
-      count += 1
-    end
-  end
-end
+
 
 def process(selection)
   case selection
@@ -127,6 +129,7 @@ def process(selection)
   when "3"
     save_students
   when "4"
+    puts "specify filename"
     load_students
   when "5"
     show_select_students
@@ -138,26 +141,41 @@ def process(selection)
 end
 
 def save_students
-  file = File.open("students.csv", "w")
-  @students.each do |student|
-    student_data = [student[:name], student[:cohort], student[:hobby], student[:birthplace], student[:height]]
-    csv_line = student_data.join(",")
-    file.puts csv_line
+  puts "Specify filename"
+  filename = STDIN.gets.strip
+  return if filename == ""
+  if File.exists?(filename)
+    File.open(filename, "w"){ |file|
+    @students.each do |student|
+      student_data = [student[:name], student[:cohort], student[:hobby], student[:birthplace], student[:height]]
+      csv_line = student_data.join(",")
+      file.puts csv_line
+    end
+    }
+    puts "Students saved".center(179)
+    @delineate.call
+  else
+    puts "file does not exist"
+    return
   end
-  file.close
-  puts "Student(s) saved"
 end
 
-def load_students(filename = "students.csv")
-  file = File.open(filename, "r")
-  file.readlines.each do |line|
-  name, cohort, hobby, birthplace, height = line.chomp.split(',')
-    @students << {name: name, cohort: cohort, hobby: hobby, birthplace: birthplace, height: height}
-  end
-  file.close
-  puts "-------------------".center(180)
+def load_students(filename = STDIN.gets.strip)
+  return if filename == ""
+  if File.exists?(filename)
+    File.open(filename, "r"){ |file|
+    file.readlines.each do |line|
+      name, cohort, hobby, birthplace, height = line.chomp.split(',')
+      @students << {name: name, cohort: cohort, hobby: hobby, birthplace: birthplace, height: height}
+    end
+  }
   puts "Loaded #{filename}".center(180)
-  puts "-------------------".center(180)
+  @delineate.call
+  else
+    puts "file does not exist"
+    return
+  end
+
 end
 
 def try_load_students
